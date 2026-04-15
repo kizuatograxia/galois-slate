@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import MathDisplay from "./MathDisplay";
+import MathBackground from "./MathBackground";
 import NumericKeypad from "./NumericKeypad";
 import { solveLinear, solveQuadratic, solveCubic, type Solution } from "@/lib/GaloisEngine";
 import type { BookRect } from "@/pages/Index";
@@ -110,8 +111,9 @@ const ExpandedBook = ({ degree, initialRect, onBack }: ExpandedBookProps) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4, duration: 0.4 }}
-        className="h-full overflow-y-auto"
+      className={`h-full overflow-y-auto relative`}
       >
+        <MathBackground opacity={0.05} color="hsl(0, 0%, 90%)" />
         {/* Top bar */}
         <div className="flex items-center justify-between px-6 py-4">
           <button
