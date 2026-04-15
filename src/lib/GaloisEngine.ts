@@ -14,6 +14,41 @@ function formatNum(n: number): string {
   return Math.abs(n) < 1e-10 ? "0" : parseFloat(n.toFixed(6)).toString();
 }
 
+function formatParens(n: number): string {
+  return `(${formatNum(n)})`;
+}
+
+function formatPolynomialTerm(coefficient: number, variable: string, isFirst: boolean): string | null {
+  if (Math.abs(coefficient) < 1e-10) return null;
+
+  const abs = Math.abs(coefficient);
+  const absText = formatNum(abs);
+  const body = variable && absText === "1" ? variable : `${absText}${variable}`;
+
+  if (isFirst) return coefficient < 0 ? `-${body}` : body;
+  return coefficient < 0 ? `- ${body}` : `+ ${body}`;
+}
+
+function formatPolynomial(terms: { coefficient: number; variable: string }[]): string {
+  const parts: string[] = [];
+
+  terms.forEach((term) => {
+    const part = formatPolynomialTerm(term.coefficient, term.variable, parts.length === 0);
+    if (part) parts.push(part);
+  });
+
+  return parts.length > 0 ? parts.join(" ") : "0";
+}
+
+function formatRootFactor(root: number): string {
+  if (Math.abs(root) < 1e-10) return "x";
+  return root < 0 ? `x + ${formatNum(Math.abs(root))}` : `x - ${formatNum(root)}`;
+}
+
+function formatLeadingCoefficient(coefficient: number): string {
+  return Math.abs(coefficient - 1) < 1e-10 ? "" : formatNum(coefficient);
+}
+
 function rootStr(r: { real: number; imag: number }): string {
   if (Math.abs(r.imag) < 1e-10) return formatNum(r.real);
   const sign = r.imag > 0 ? "+" : "-";
@@ -45,35 +80,65 @@ export function solveQuadratic(a: number, b: number, c: number): Solution {
   if (a === 0) return solveLinear(b, c);
 
   const disc = b * b - 4 * a * c;
+  const equation = formatPolynomial([
+    { coefficient: a, variable: "x^2" },
+    { coefficient: b, variable: "x" },
+    { coefficient: c, variable: "" },
+  ]);
   const steps: SolutionStep[] = [
-    { title: "Equação", latex: `${a}x^2 + ${b}x + ${c} = 0`, description: "Equação quadrática dada." },
-    { title: "Discriminante", latex: `\\Delta = b^2 - 4ac = ${b}^2 - 4 \\cdot ${a} \\cdot ${c} = ${formatNum(disc)}`, description: "Calculamos o discriminante para determinar a natureza das raízes." },
+    { title: "Equação", latex: `${equation} = 0`, description: "Equação quadrática dada." },
+    {
+      title: "Discriminante",
+      latex: `\\Delta = b^2 - 4ac = ${formatParens(b)}^2 - 4 \\cdot ${formatParens(a)} \\cdot ${formatParens(c)} = ${formatNum(disc)}`,
+      description: "Calculamos o discriminante para determinar a natureza das raízes.",
+    },
+    {
+      title: "Fórmula de Bhaskara",
+      latex: `x = \\frac{-b \\pm \\sqrt{\\Delta}}{2a}`,
+      description: "Usamos a fórmula de Bhaskara para resolver a equação quadrática.",
+    },
   ];
 
   let roots: { real: number; imag: number }[];
+  const denominator = 2 * a;
 
   if (disc >= 0) {
     const sqrtDisc = Math.sqrt(disc);
-    const x1 = (-b + sqrtDisc) / (2 * a);
-    const x2 = (-b - sqrtDisc) / (2 * a);
+    const negativeB = -b;
+    const numerator1 = negativeB + sqrtDisc;
+    const numerator2 = negativeB - sqrtDisc;
+    const x1 = numerator1 / denominator;
+    const x2 = numerator2 / denominator;
     roots = [{ real: x1, imag: 0 }, { real: x2, imag: 0 }];
     steps.push({
-      title: "Fórmula de Bhaskara",
-      latex: `x = \\frac{-b \\pm \\sqrt{\\Delta}}{2a} = \\frac{${-b} \\pm ${formatNum(sqrtDisc)}}{${2 * a}}`,
-      description: "Aplicamos a fórmula quadrática (resolução por radicais).",
+      title: "Substituição",
+      latex: `x = \\frac{-${formatParens(b)} \\pm \\sqrt{${formatNum(disc)}}}{2 \\cdot ${formatParens(a)}} = \\frac{${formatNum(negativeB)} \\pm ${formatNum(sqrtDisc)}}{${formatNum(denominator)}}`,
+      description: `Aqui aparece o sinal: como b = ${formatNum(b)}, então -b = ${formatNum(negativeB)}.`,
     });
     steps.push({
-      title: "Raízes",
-      latex: `x_1 = ${formatNum(x1)}, \\quad x_2 = ${formatNum(x2)}`,
+      title: "Cálculo das Raízes",
+      latex: `x_1 = \\frac{${formatNum(negativeB)} + ${formatNum(sqrtDisc)}}{${formatNum(denominator)}} = \\frac{${formatNum(numerator1)}}{${formatNum(denominator)}} = ${formatNum(x1)}, \\quad x_2 = \\frac{${formatNum(negativeB)} - ${formatNum(sqrtDisc)}}{${formatNum(denominator)}} = \\frac{${formatNum(numerator2)}}{${formatNum(denominator)}} = ${formatNum(x2)}`,
       description: disc === 0 ? "Raiz dupla (discriminante zero)." : "Duas raízes reais distintas.",
     });
+    steps.push({
+      title: "Forma Fatorada",
+      latex: `${formatLeadingCoefficient(a)}(x - (${formatNum(x1)}))(x - (${formatNum(x2)})) = ${formatLeadingCoefficient(a)}(${formatRootFactor(x1)})(${formatRootFactor(x2)}) = 0`,
+      description: "Na forma fatorada, raiz negativa troca o sinal dentro do parêntese.",
+    });
   } else {
+    const negativeB = -b;
     const realPart = -b / (2 * a);
-    const imagPart = Math.sqrt(-disc) / (2 * a);
+    const sqrtAbsDisc = Math.sqrt(-disc);
+    const imagPart = Math.abs(sqrtAbsDisc / denominator);
     roots = [
       { real: realPart, imag: imagPart },
       { real: realPart, imag: -imagPart },
     ];
+    steps.push({
+      title: "Substituição",
+      latex: `x = \\frac{-${formatParens(b)} \\pm \\sqrt{${formatNum(disc)}}}{2 \\cdot ${formatParens(a)}} = \\frac{${formatNum(negativeB)} \\pm ${formatNum(sqrtAbsDisc)}i}{${formatNum(denominator)}}`,
+      description: `Como Δ é negativo, usamos \\sqrt{${formatNum(disc)}} = ${formatNum(sqrtAbsDisc)}i.`,
+    });
     steps.push({
       title: "Raízes Complexas",
       latex: `x = ${formatNum(realPart)} \\pm ${formatNum(imagPart)}i`,

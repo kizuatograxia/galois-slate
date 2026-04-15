@@ -11,6 +11,9 @@ node_modules
 dist
 dist-ssr
 *.local
+.claude/worktrees/
+.paperclip/
+.paperclip-worktrees/
 
 # Editor directories and files
 .vscode/*

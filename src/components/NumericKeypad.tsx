@@ -11,7 +11,8 @@ const keys = [
   ["7", "8", "9"],
   ["4", "5", "6"],
   ["1", "2", "3"],
-  ["±", "0", "."],
+  ["-", "0", "+"],
+  ["±", ".", "⌫"],
 ];
 
 const NumericKeypad = ({ onKey, onDelete, onClear, onSolve }: NumericKeypadProps) => {
@@ -22,33 +23,24 @@ const NumericKeypad = ({ onKey, onDelete, onClear, onSolve }: NumericKeypadProps
       transition={{ delay: 0.3, duration: 0.4 }}
       className="w-full max-w-xs mx-auto"
     >
-      <div className="grid grid-cols-4 gap-2">
-        {keys.map((row, ri) =>
+      <div className="grid grid-cols-3 gap-2">
+        {keys.map((row) =>
           row.map((key) => (
             <motion.button
               key={key}
               whileTap={{ scale: 0.92 }}
               whileHover={{ scale: 1.05 }}
-              onClick={() => onKey(key)}
+              onClick={() => (key === "⌫" ? onDelete() : onKey(key))}
               className="keypad-btn font-chalk text-2xl"
             >
               {key}
             </motion.button>
           ))
         )}
-        {/* Right column: action keys */}
       </div>
 
       {/* Action row */}
-      <div className="mt-2 grid grid-cols-3 gap-2">
-        <motion.button
-          whileTap={{ scale: 0.92 }}
-          whileHover={{ scale: 1.05 }}
-          onClick={onDelete}
-          className="keypad-btn-action font-sans text-sm font-medium"
-        >
-          ⌫
-        </motion.button>
+      <div className="mt-2 grid grid-cols-2 gap-2">
         <motion.button
           whileTap={{ scale: 0.92 }}
           whileHover={{ scale: 1.05 }}
