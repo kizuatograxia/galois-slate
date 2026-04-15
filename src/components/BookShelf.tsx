@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
+import MathBackground from "./MathBackground";
 
 interface Book {
   degree: number;
@@ -53,8 +54,9 @@ const BookShelf = ({ onSelect }: BookShelfProps) => {
     <motion.div
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="flex min-h-screen flex-col items-center justify-center px-4"
+      className="relative flex min-h-screen flex-col items-center justify-center px-4 overflow-hidden"
     >
+      <MathBackground opacity={0.045} />
       <motion.h1
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
