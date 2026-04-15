@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 
 interface Book {
@@ -34,14 +34,27 @@ const books: Book[] = [
 ];
 
 interface BookShelfProps {
-  onSelect: (degree: number) => void;
+  onSelect: (degree: number, rect: DOMRect) => void;
 }
 
 const BookShelf = ({ onSelect }: BookShelfProps) => {
   const [hovered, setHovered] = useState<number | null>(null);
+  const bookRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  const handleClick = (book: Book, i: number) => {
+    const el = bookRefs.current[i];
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      onSelect(book.degree, rect);
+    }
+  };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-4">
+    <motion.div
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+      className="flex min-h-screen flex-col items-center justify-center px-4"
+    >
       <motion.h1
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -67,12 +80,13 @@ const BookShelf = ({ onSelect }: BookShelfProps) => {
           return (
             <motion.button
               key={book.degree}
+              ref={(el) => { bookRefs.current[i] = el; }}
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 + i * 0.15, duration: 0.5 }}
               onMouseEnter={() => setHovered(i)}
               onMouseLeave={() => setHovered(null)}
-              onClick={() => onSelect(book.degree)}
+              onClick={() => handleClick(book, i)}
               className="group relative cursor-pointer focus:outline-none"
               style={{ transformOrigin: "bottom center" }}
             >
@@ -90,7 +104,6 @@ const BookShelf = ({ onSelect }: BookShelfProps) => {
                     : "0 8px 40px -8px hsla(215, 40%, 20%, 0.2)",
                 }}
               >
-                {/* Spine line */}
                 <div className="absolute left-3 top-0 h-full w-px bg-gradient-to-b from-transparent via-primary-foreground/20 to-transparent" />
 
                 <div className="mt-4 flex flex-col items-center">
@@ -129,7 +142,7 @@ const BookShelf = ({ onSelect }: BookShelfProps) => {
       >
         "Les mathématiques ne sont qu'une histoire de groupes." — Henri Poincaré
       </motion.p>
-    </div>
+    </motion.div>
   );
 };
 
