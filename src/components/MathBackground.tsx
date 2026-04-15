@@ -118,23 +118,23 @@ const rng = (seed: number): number => {
   return x - Math.floor(x);
 };
 
-// A few lightweight writers sit on top of dense static rows. This keeps the
-// "chalk writing" feel without animating hundreds of independent cells.
+// A few lightweight rows animate in their own lanes, so text never stacks on
+// top of other text.
 const CHALK_KEYFRAMES = `
-  @keyframes chalkWrite {
+  @keyframes chalkLine {
     0%   { clip-path: inset(0 100% 0 0); opacity: 0; }
-    5%   { opacity: .92; }
-    24%  { clip-path: inset(0 0% 0 0); opacity: .92; }
-    78%  { clip-path: inset(0 0% 0 0); opacity: .92; }
-    94%  { clip-path: inset(0 0% 0 0); opacity: 0; }
+    5%   { opacity: .75; }
+    26%  { clip-path: inset(0 0% 0 0); opacity: .75; }
+    86%  { clip-path: inset(0 0% 0 0); opacity: .75; }
+    96%  { clip-path: inset(0 0% 0 0); opacity: 0; }
     100% { clip-path: inset(0 0% 0 0); opacity: 0; }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .chalk-writer {
+    .chalk-row--animated {
       animation: none !important;
       clip-path: none !important;
-      opacity: .85 !important;
+      opacity: .65 !important;
     }
   }
 `;
@@ -145,9 +145,9 @@ interface MathBackgroundProps {
   className?: string;
 }
 
-const ROW_COUNT = 72;
-const TERMS_PER_ROW = 30;
-const WRITER_COUNT = 16;
+const ROW_COUNT = 46;
+const TERMS_PER_ROW = 26;
+const ANIMATE_EVERY = 11;
 
 const makeLine = (seed: number, terms: number) =>
   Array.from({ length: terms }, (_, i) => mathLines[(seed * 7 + i * 11) % mathLines.length]).join("   ");
@@ -157,29 +157,15 @@ const MathBackground = memo(({ opacity = 0.09, color, className = "" }: MathBack
     () =>
       Array.from({ length: ROW_COUNT }, (_, i) => ({
         text: makeLine(i, TERMS_PER_ROW),
-        top: `${-3 + (i * 106) / (ROW_COUNT - 1)}%`,
-        left: `${-34 - rng(i + 20) * 18}%`,
-        rotate: (rng(i + 40) - 0.5) * 1.8,
-        sizeScale: 0.88 + rng(i + 60) * 0.24,
-        alpha: 0.7 + rng(i + 80) * 0.3,
+        shift: -22 - rng(i + 20) * 22,
+        rotate: (rng(i + 40) - 0.5) * 1.1,
+        sizeScale: 0.9 + rng(i + 60) * 0.18,
+        alpha: 0.58 + rng(i + 80) * 0.24,
+        animation:
+          i % ANIMATE_EVERY === 0
+            ? `chalkLine ${(18 + rng(i + 100) * 18).toFixed(1)}s -${(rng(i + 120) * 28).toFixed(1)}s infinite linear`
+            : undefined,
       })),
-    [],
-  );
-
-  const writers = useMemo(
-    () =>
-      Array.from({ length: WRITER_COUNT }, (_, i) => {
-        const duration = 16 + rng(i + 120) * 16;
-
-        return {
-          text: mathLines[(i * 13 + 5) % mathLines.length],
-          top: `${4 + rng(i + 140) * 90}%`,
-          left: `${-6 + rng(i + 160) * 98}%`,
-          rotate: (rng(i + 180) - 0.5) * 4,
-          sizeScale: 0.95 + rng(i + 200) * 0.35,
-          animation: `chalkWrite ${duration.toFixed(1)}s -${(rng(i + 220) * duration).toFixed(1)}s infinite linear`,
-        };
-      }),
     [],
   );
 
@@ -193,46 +179,32 @@ const MathBackground = memo(({ opacity = 0.09, color, className = "" }: MathBack
         style={{
           color: color ?? "hsl(var(--foreground))",
           opacity,
-          fontSize: "clamp(0.68rem, 1.05vw, 1rem)",
+          fontSize: "clamp(0.56rem, 0.85vw, 0.82rem)",
         }}
       >
-        <div className="absolute inset-0" style={{ contain: "layout paint style" }}>
+        <div
+          className="absolute inset-0 grid"
+          style={{
+            contain: "layout paint style",
+            gridTemplateRows: `repeat(${ROW_COUNT}, minmax(0, 1fr))`,
+          }}
+        >
           {rows.map((row, i) => (
             <span
               key={i}
-              className="absolute font-chalk whitespace-nowrap"
+              className={`font-chalk whitespace-nowrap ${row.animation ? "chalk-row--animated" : ""}`}
               style={{
-                top: row.top,
-                left: row.left,
+                alignSelf: "center",
                 fontSize: `${row.sizeScale}em`,
-                lineHeight: 0.95,
+                lineHeight: 1.05,
                 opacity: row.alpha,
-                transform: `rotate(${row.rotate}deg)`,
+                transform: `translateX(${row.shift}%) rotate(${row.rotate}deg)`,
                 transformOrigin: "left center",
+                animation: row.animation,
                 textShadow: "0 0 1px currentColor",
               }}
             >
               {row.text}
-            </span>
-          ))}
-
-          {writers.map((writer, i) => (
-            <span
-              key={`writer-${i}`}
-              className="chalk-writer absolute inline-block font-chalk whitespace-nowrap"
-              style={{
-                top: writer.top,
-                left: writer.left,
-                fontSize: `${writer.sizeScale}em`,
-                lineHeight: 0.95,
-                transform: `rotate(${writer.rotate}deg)`,
-                transformOrigin: "left center",
-                animation: writer.animation,
-                textShadow: "0 0 1px currentColor",
-                willChange: "clip-path, opacity",
-              }}
-            >
-              {writer.text}
             </span>
           ))}
         </div>
