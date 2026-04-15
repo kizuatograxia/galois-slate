@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import MathDisplay from "./MathDisplay";
 import MathBackground from "./MathBackground";
@@ -42,7 +42,7 @@ const ExpandedBook = ({ degree, initialRect, onBack }: ExpandedBookProps) => {
     [values],
   );
 
-  const handleKey = (key: string) => {
+  const handleKey = useCallback((key: string) => {
     setValues((prev) => {
       const next = [...prev];
       const current = next[activeField];
@@ -61,31 +61,91 @@ const ExpandedBook = ({ degree, initialRect, onBack }: ExpandedBookProps) => {
       }
       return next;
     });
-  };
+  }, [activeField]);
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     setValues((prev) => {
       const next = [...prev];
       next[activeField] = next[activeField].slice(0, -1);
       return next;
     });
-  };
+  }, [activeField]);
 
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
     setValues((prev) => {
       const next = [...prev];
       next[activeField] = "";
       return next;
     });
-  };
+  }, [activeField]);
 
-  const solve = () => {
+  const solve = useCallback(() => {
     let sol: Solution;
     if (degree === 1) sol = solveLinear(coeffs[0], coeffs[1]);
     else if (degree === 2) sol = solveQuadratic(coeffs[0], coeffs[1], coeffs[2]);
     else sol = solveCubic(coeffs[0], coeffs[1], coeffs[2], coeffs[3]);
     setSolution(sol);
-  };
+  }, [coeffs, degree]);
+
+  useEffect(() => {
+    const handleKeyboardInput = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const isEditable =
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA" ||
+        target?.tagName === "SELECT" ||
+        target?.isContentEditable;
+
+      if (isEditable || event.ctrlKey || event.metaKey || event.altKey) return;
+
+      if (/^\d$/.test(event.key)) {
+        event.preventDefault();
+        handleKey(event.key);
+        return;
+      }
+
+      if (event.key === "." || event.key === ",") {
+        event.preventDefault();
+        handleKey(".");
+        return;
+      }
+
+      if (event.key === "+" || event.key === "-") {
+        event.preventDefault();
+        handleKey(event.key);
+        return;
+      }
+
+      if (event.key === "Backspace") {
+        event.preventDefault();
+        handleDelete();
+        return;
+      }
+
+      if (event.key === "Delete" || event.key === "Escape") {
+        event.preventDefault();
+        handleClear();
+        return;
+      }
+
+      if (event.key === "Enter") {
+        event.preventDefault();
+        solve();
+        return;
+      }
+
+      if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+        event.preventDefault();
+        setActiveField((current) => {
+          const direction = event.key === "ArrowRight" ? 1 : -1;
+          return (current + direction + labels.length) % labels.length;
+        });
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyboardInput);
+    return () => window.removeEventListener("keydown", handleKeyboardInput);
+  }, [handleClear, handleDelete, handleKey, labels.length, solve]);
 
   return (
     <motion.div
@@ -165,7 +225,7 @@ const ExpandedBook = ({ degree, initialRect, onBack }: ExpandedBookProps) => {
             className="whiteboard w-full max-w-md p-4 sm:p-6 md:p-8"
           >
             <p className="mb-5 text-center text-sm text-muted-foreground">
-              Toque no coeficiente e use o teclado:
+              Toque no coeficiente e use o teclado da tela ou do PC:
             </p>
 
             {/* Coefficient fields */}
