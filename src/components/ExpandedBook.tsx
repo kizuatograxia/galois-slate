@@ -111,11 +111,11 @@ const ExpandedBook = ({ degree, initialRect, onBack }: ExpandedBookProps) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4, duration: 0.4 }}
-      className={`h-full overflow-y-auto relative`}
+        className="relative h-full overflow-y-auto"
       >
         <MathBackground opacity={0.05} color="hsl(0, 0%, 90%)" />
         {/* Top bar */}
-        <div className="flex items-center justify-between px-6 py-4">
+        <div className="relative z-10 flex items-center justify-between px-4 py-4 sm:px-6">
           <button
             onClick={onBack}
             className="group flex items-center gap-2 text-sm text-primary-foreground/70 transition-colors hover:text-primary-foreground"
@@ -129,12 +129,12 @@ const ExpandedBook = ({ degree, initialRect, onBack }: ExpandedBookProps) => {
         </div>
 
         {/* Content area - whiteboard */}
-        <div className="flex flex-col items-center px-4 pb-12">
+        <div className="relative z-10 flex flex-col items-center px-3 pb-10 sm:px-4 sm:pb-12">
           <motion.h2
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="mb-1 font-serif text-3xl font-semibold text-primary-foreground md:text-4xl"
+            className="mb-1 px-2 text-center font-serif text-2xl font-semibold text-primary-foreground sm:text-3xl md:text-4xl"
           >
             {info.title}
           </motion.h2>
@@ -142,8 +142,9 @@ const ExpandedBook = ({ degree, initialRect, onBack }: ExpandedBookProps) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6 }}
+            className="w-full max-w-full overflow-x-auto text-center"
           >
-            <MathDisplay latex={info.equation} className="mb-8 text-primary-foreground/70" />
+            <MathDisplay latex={info.equation} className="mb-6 block text-primary-foreground/70 sm:mb-8" />
           </motion.div>
 
           {/* Whiteboard card */}
@@ -151,20 +152,20 @@ const ExpandedBook = ({ degree, initialRect, onBack }: ExpandedBookProps) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.4 }}
-            className="whiteboard w-full max-w-md p-6 md:p-8"
+            className="whiteboard w-full max-w-md p-4 sm:p-6 md:p-8"
           >
             <p className="mb-5 text-center text-sm text-muted-foreground">
               Toque no coeficiente e use o teclado:
             </p>
 
             {/* Coefficient fields */}
-            <div className="mb-6 flex items-center justify-center gap-4 md:gap-6">
+            <div className="mb-6 grid grid-cols-2 justify-items-center gap-x-6 gap-y-4 sm:flex sm:items-center sm:justify-center sm:gap-4 md:gap-6">
               {labels.map((label, i) => (
                 <div key={label} className="flex flex-col items-center">
                   <label className="mb-2 font-serif text-sm text-muted-foreground">{label}</label>
                   <button
                     onClick={() => setActiveField(i)}
-                    className={`input-notebook w-16 md:w-20 cursor-pointer text-center transition-all duration-200 ${
+                    className={`input-notebook w-14 cursor-pointer text-center transition-all duration-200 sm:w-16 md:w-20 ${
                       activeField === i
                         ? "border-b-2 border-accent ring-2 ring-accent/20"
                         : "border-b-2"
@@ -231,7 +232,7 @@ const ExpandedBook = ({ degree, initialRect, onBack }: ExpandedBookProps) => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: solution.steps.length * 0.1 + 0.2 }}
-                  className="mt-5 rounded-lg border border-accent/30 bg-secondary p-5"
+                  className="mt-5 rounded-lg border border-accent/30 bg-secondary p-4 sm:p-5"
                 >
                   <h4 className="mb-1 font-serif text-base font-semibold text-primary">
                     Estrutura de Grupo (Galois)

@@ -61,7 +61,7 @@ const BookShelf = ({ onSelect }: BookShelfProps) => {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="mb-3 font-serif text-5xl font-semibold tracking-tight text-primary md:text-6xl"
+        className="mb-2 px-4 text-center font-serif text-4xl font-semibold tracking-tight text-primary sm:text-5xl md:text-6xl"
       >
         Galois Canvas
       </motion.h1>
@@ -69,12 +69,12 @@ const BookShelf = ({ onSelect }: BookShelfProps) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3, duration: 0.5 }}
-        className="mb-16 text-lg text-muted-foreground"
+        className="mb-8 px-4 text-center text-base text-muted-foreground sm:mb-12 sm:text-lg md:mb-16"
       >
         Selecione o grau da equação
       </motion.p>
 
-      <div className="flex items-end gap-4 md:gap-6">
+      <div className="flex w-full max-w-[24rem] items-end justify-center gap-2 sm:max-w-[30rem] sm:gap-3 md:max-w-none md:gap-6">
         {books.map((book, i) => {
           const isHovered = hovered === i;
           const isOther = hovered !== null && hovered !== i;
@@ -94,12 +94,11 @@ const BookShelf = ({ onSelect }: BookShelfProps) => {
             >
               <motion.div
                 animate={{
-                  width: isHovered ? 220 : 150,
                   opacity: isOther ? 0.6 : 1,
-                  scale: isHovered ? 1.05 : isOther ? 0.97 : 1,
+                  scale: isHovered ? 1.04 : isOther ? 0.98 : 1,
                 }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                className={`relative flex h-[320px] flex-col items-center justify-between overflow-hidden rounded-lg bg-gradient-to-b ${book.color} p-6 md:h-[380px]`}
+                className={`relative flex h-[min(48vh,320px)] w-[clamp(5.75rem,27vw,8.5rem)] flex-col items-center justify-between overflow-hidden rounded-lg bg-gradient-to-b ${book.color} p-3 sm:h-[320px] sm:w-32 sm:p-4 md:h-[380px] md:w-[150px] md:p-6`}
                 style={{
                   boxShadow: isHovered
                     ? "0 12px 50px -10px hsla(213, 70%, 30%, 0.35), 4px 0 15px -5px hsla(213, 70%, 30%, 0.1)"
@@ -109,7 +108,7 @@ const BookShelf = ({ onSelect }: BookShelfProps) => {
                 <div className="absolute left-3 top-0 h-full w-px bg-gradient-to-b from-transparent via-primary-foreground/20 to-transparent" />
 
                 <div className="mt-4 flex flex-col items-center">
-                  <span className="font-serif text-4xl font-bold tracking-wider text-primary-foreground/90 md:text-5xl">
+                  <span className="font-serif text-3xl font-bold tracking-wider text-primary-foreground/90 sm:text-4xl md:text-5xl">
                     {book.title}
                   </span>
                 </div>
@@ -117,7 +116,7 @@ const BookShelf = ({ onSelect }: BookShelfProps) => {
                 <motion.div
                   animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : 10 }}
                   transition={{ duration: 0.3 }}
-                  className="flex flex-col items-center text-center"
+                  className="hidden flex-col items-center text-center md:flex"
                 >
                   <span className="text-sm font-medium tracking-wide text-primary-foreground/80">
                     {book.subtitle}
@@ -127,7 +126,7 @@ const BookShelf = ({ onSelect }: BookShelfProps) => {
                   </span>
                 </motion.div>
 
-                <div className="mb-2 text-xs font-medium uppercase tracking-[0.2em] text-primary-foreground/40">
+                <div className="mb-2 text-[0.65rem] font-medium uppercase tracking-[0.16em] text-primary-foreground/40 sm:text-xs sm:tracking-[0.2em]">
                   Vol. {book.degree}
                 </div>
               </motion.div>
@@ -140,7 +139,7 @@ const BookShelf = ({ onSelect }: BookShelfProps) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8 }}
-        className="mt-12 font-serif text-sm italic text-muted-foreground"
+        className="mt-8 max-w-xs px-4 text-center font-serif text-sm italic text-muted-foreground sm:mt-12 sm:max-w-none"
       >
         "Les mathématiques ne sont qu'une histoire de groupes." — Henri Poincaré
       </motion.p>

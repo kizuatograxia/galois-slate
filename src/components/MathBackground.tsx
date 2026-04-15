@@ -118,32 +118,24 @@ const rng = (seed: number): number => {
   return x - Math.floor(x);
 };
 
-// Equations stay visible ~93 % of their cycle; invisible only ~7 %.
-// Three profiles vary the write-speed for natural feel.
+// A few lightweight writers sit on top of dense static rows. This keeps the
+// "chalk writing" feel without animating hundreds of independent cells.
 const CHALK_KEYFRAMES = `
-  @keyframes chalkWrite1 {
+  @keyframes chalkWrite {
     0%   { clip-path: inset(0 100% 0 0); opacity: 0; }
-    2%   { opacity: 1; }
-    10%  { clip-path: inset(0 0% 0 0);   opacity: 1; }
-    89%  { clip-path: inset(0 0% 0 0);   opacity: 1; }
-    96%  { clip-path: inset(0 0% 0 0);   opacity: 0; }
-    100% { clip-path: inset(0 100% 0 0); opacity: 0; }
+    5%   { opacity: .92; }
+    24%  { clip-path: inset(0 0% 0 0); opacity: .92; }
+    78%  { clip-path: inset(0 0% 0 0); opacity: .92; }
+    94%  { clip-path: inset(0 0% 0 0); opacity: 0; }
+    100% { clip-path: inset(0 0% 0 0); opacity: 0; }
   }
-  @keyframes chalkWrite2 {
-    0%   { clip-path: inset(0 100% 0 0); opacity: 0; }
-    2%   { opacity: 1; }
-    15%  { clip-path: inset(0 0% 0 0);   opacity: 1; }
-    87%  { clip-path: inset(0 0% 0 0);   opacity: 1; }
-    95%  { clip-path: inset(0 0% 0 0);   opacity: 0; }
-    100% { clip-path: inset(0 100% 0 0); opacity: 0; }
-  }
-  @keyframes chalkWrite3 {
-    0%   { clip-path: inset(0 100% 0 0); opacity: 0; }
-    2%   { opacity: 1; }
-    8%   { clip-path: inset(0 0% 0 0);   opacity: 1; }
-    91%  { clip-path: inset(0 0% 0 0);   opacity: 1; }
-    97%  { clip-path: inset(0 0% 0 0);   opacity: 0; }
-    100% { clip-path: inset(0 100% 0 0); opacity: 0; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .chalk-writer {
+      animation: none !important;
+      clip-path: none !important;
+      opacity: .85 !important;
+    }
   }
 `;
 
@@ -153,27 +145,39 @@ interface MathBackgroundProps {
   className?: string;
 }
 
-// Generate enough cells to fill up to 2K screens (2560×1440).
-// auto-fill columns + fixed row height = no gaps at any viewport.
-const CELL_COUNT = 800;
+const ROW_COUNT = 72;
+const TERMS_PER_ROW = 30;
+const WRITER_COUNT = 16;
+
+const makeLine = (seed: number, terms: number) =>
+  Array.from({ length: terms }, (_, i) => mathLines[(seed * 7 + i * 11) % mathLines.length]).join("   ");
 
 const MathBackground = memo(({ opacity = 0.09, color, className = "" }: MathBackgroundProps) => {
-  const cells = useMemo(
+  const rows = useMemo(
     () =>
-      Array.from({ length: CELL_COUNT }, (_, i) => {
-        const cycleDuration = 18 + rng(i) * 22;               // 18–40 s
-        const startOffset = -(rng(i + 100) * cycleDuration);   // start mid-cycle
-        const rotate = (rng(i + 200) - 0.5) * 3;              // ±1.5°
-        const sizeScale = 0.85 + rng(i + 300) * 0.3;          // 0.85–1.15 em
-        const variant = (Math.floor(rng(i + 400) * 3) + 1) as 1 | 2 | 3;
+      Array.from({ length: ROW_COUNT }, (_, i) => ({
+        text: makeLine(i, TERMS_PER_ROW),
+        top: `${-3 + (i * 106) / (ROW_COUNT - 1)}%`,
+        left: `${-34 - rng(i + 20) * 18}%`,
+        rotate: (rng(i + 40) - 0.5) * 1.8,
+        sizeScale: 0.88 + rng(i + 60) * 0.24,
+        alpha: 0.7 + rng(i + 80) * 0.3,
+      })),
+    [],
+  );
+
+  const writers = useMemo(
+    () =>
+      Array.from({ length: WRITER_COUNT }, (_, i) => {
+        const duration = 16 + rng(i + 120) * 16;
 
         return {
-          text: mathLines[i % mathLines.length],
-          duration: `${cycleDuration.toFixed(2)}s`,
-          delay: `${startOffset.toFixed(2)}s`,
-          rotate,
-          sizeScale,
-          variant,
+          text: mathLines[(i * 13 + 5) % mathLines.length],
+          top: `${4 + rng(i + 140) * 90}%`,
+          left: `${-6 + rng(i + 160) * 98}%`,
+          rotate: (rng(i + 180) - 0.5) * 4,
+          sizeScale: 0.95 + rng(i + 200) * 0.35,
+          animation: `chalkWrite ${duration.toFixed(1)}s -${(rng(i + 220) * duration).toFixed(1)}s infinite linear`,
         };
       }),
     [],
@@ -189,37 +193,46 @@ const MathBackground = memo(({ opacity = 0.09, color, className = "" }: MathBack
         style={{
           color: color ?? "hsl(var(--foreground))",
           opacity,
-          // Responsive base size: scales with viewport width
-          fontSize: "clamp(0.58rem, 0.9vw, 0.92rem)",
+          fontSize: "clamp(0.68rem, 1.05vw, 1rem)",
         }}
       >
-        <div
-          style={{
-            display: "grid",
-            // Auto-fill: adds more columns on wider screens
-            gridTemplateColumns: "repeat(auto-fill, minmax(9rem, 1fr))",
-            // Fixed compact row height — scales with vh so rows stay tight on any screen
-            gridAutoRows: "clamp(1.3rem, 2.4vh, 2.2rem)",
-            width: "100%",
-            height: "100%",
-          }}
-        >
-          {cells.map((cell, i) => (
+        <div className="absolute inset-0" style={{ contain: "layout paint style" }}>
+          {rows.map((row, i) => (
             <span
               key={i}
-              className="font-chalk whitespace-nowrap overflow-hidden"
+              className="absolute font-chalk whitespace-nowrap"
               style={{
-                display: "flex",
-                alignItems: "center",
-                fontSize: `${cell.sizeScale}em`,
-                transform: `rotate(${cell.rotate}deg)`,
+                top: row.top,
+                left: row.left,
+                fontSize: `${row.sizeScale}em`,
+                lineHeight: 0.95,
+                opacity: row.alpha,
+                transform: `rotate(${row.rotate}deg)`,
                 transformOrigin: "left center",
-                lineHeight: 1.2,
-                animation: `chalkWrite${cell.variant} ${cell.duration} ${cell.delay} infinite linear`,
                 textShadow: "0 0 1px currentColor",
               }}
             >
-              {cell.text}
+              {row.text}
+            </span>
+          ))}
+
+          {writers.map((writer, i) => (
+            <span
+              key={`writer-${i}`}
+              className="chalk-writer absolute inline-block font-chalk whitespace-nowrap"
+              style={{
+                top: writer.top,
+                left: writer.left,
+                fontSize: `${writer.sizeScale}em`,
+                lineHeight: 0.95,
+                transform: `rotate(${writer.rotate}deg)`,
+                transformOrigin: "left center",
+                animation: writer.animation,
+                textShadow: "0 0 1px currentColor",
+                willChange: "clip-path, opacity",
+              }}
+            >
+              {writer.text}
             </span>
           ))}
         </div>

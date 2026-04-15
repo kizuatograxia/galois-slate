@@ -22,8 +22,8 @@ const NumericKeypad = ({ onKey, onDelete, onClear, onSolve }: NumericKeypadProps
       transition={{ delay: 0.3, duration: 0.4 }}
       className="w-full max-w-xs mx-auto"
     >
-      <div className="grid grid-cols-4 gap-2">
-        {keys.map((row, ri) =>
+      <div className="grid grid-cols-3 gap-2">
+        {keys.map((row) =>
           row.map((key) => (
             <motion.button
               key={key}
@@ -36,7 +36,6 @@ const NumericKeypad = ({ onKey, onDelete, onClear, onSolve }: NumericKeypadProps
             </motion.button>
           ))
         )}
-        {/* Right column: action keys */}
       </div>
 
       {/* Action row */}
