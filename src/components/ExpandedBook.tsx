@@ -37,16 +37,26 @@ const ExpandedBook = ({ degree, initialRect, onBack }: ExpandedBookProps) => {
   const [solution, setSolution] = useState<Solution | null>(null);
   const info = degreeLabels[degree];
 
-  const coeffs = useMemo(() => values.map((v) => (v === "" || v === "-" ? 0 : parseFloat(v) || 0)), [values]);
+  const coeffs = useMemo(
+    () => values.map((v) => (v === "" || v === "-" || v === "+" ? 0 : parseFloat(v) || 0)),
+    [values],
+  );
 
   const handleKey = (key: string) => {
     setValues((prev) => {
       const next = [...prev];
       const current = next[activeField];
       if (key === "±") {
-        next[activeField] = current.startsWith("-") ? current.slice(1) : "-" + current;
+        if (current.startsWith("-")) next[activeField] = current.slice(1);
+        else if (current.startsWith("+")) next[activeField] = `-${current.slice(1)}`;
+        else next[activeField] = `-${current}`;
+      } else if (key === "+" || key === "-") {
+        const unsigned = current.replace(/^[+-]/, "");
+        next[activeField] = current.startsWith(key) ? unsigned : `${key}${unsigned}`;
+      } else if (key === ".") {
+        if (current.includes(".")) return prev;
+        next[activeField] = current === "" ? "0." : current === "+" || current === "-" ? `${current}0.` : current + key;
       } else {
-        if (key === "." && current.includes(".")) return prev;
         next[activeField] = current + key;
       }
       return next;
