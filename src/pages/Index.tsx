@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import BookShelf from "@/components/BookShelf";
 import ExpandedBook from "@/components/ExpandedBook";
@@ -13,11 +13,9 @@ export interface BookRect {
 const Index = () => {
   const [selectedDegree, setSelectedDegree] = useState<number | null>(null);
   const [bookRect, setBookRect] = useState<BookRect | null>(null);
-  const [expanding, setExpanding] = useState(false);
 
   const handleSelect = useCallback((degree: number, rect: DOMRect) => {
     setBookRect({ x: rect.x, y: rect.y, width: rect.width, height: rect.height });
-    setExpanding(true);
     // Small delay to let the expand animation start
     requestAnimationFrame(() => {
       setSelectedDegree(degree);
@@ -25,7 +23,6 @@ const Index = () => {
   }, []);
 
   const handleBack = useCallback(() => {
-    setExpanding(false);
     setSelectedDegree(null);
     setBookRect(null);
   }, []);
@@ -33,7 +30,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background overflow-hidden relative">
       <AnimatePresence mode="wait">
-        {selectedDegree === null && !expanding ? (
+        {selectedDegree === null ? (
           <BookShelf key="shelf" onSelect={handleSelect} />
         ) : null}
       </AnimatePresence>

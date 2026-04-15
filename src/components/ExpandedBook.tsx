@@ -35,7 +35,22 @@ const ExpandedBook = ({ degree, initialRect, onBack }: ExpandedBookProps) => {
   const [values, setValues] = useState<string[]>(labels.map(() => ""));
   const [activeField, setActiveField] = useState(0);
   const [solution, setSolution] = useState<Solution | null>(null);
+  const [showContent, setShowContent] = useState(false);
   const info = degreeLabels[degree];
+  const viewport = useMemo(
+    () => ({
+      width: typeof window === "undefined" ? initialRect.width : window.innerWidth,
+      height: typeof window === "undefined" ? initialRect.height : window.innerHeight,
+    }),
+    [initialRect.height, initialRect.width],
+  );
+  const initialScale = useMemo(
+    () => ({
+      x: initialRect.width / viewport.width,
+      y: initialRect.height / viewport.height,
+    }),
+    [initialRect.height, initialRect.width, viewport.height, viewport.width],
+  );
 
   const coeffs = useMemo(
     () => values.map((v) => (v === "" || v === "-" || v === "+" ? 0 : parseFloat(v) || 0)),
@@ -150,170 +165,176 @@ const ExpandedBook = ({ degree, initialRect, onBack }: ExpandedBookProps) => {
   return (
     <motion.div
       initial={{
-        position: "fixed",
-        top: initialRect.y,
-        left: initialRect.x,
-        width: initialRect.width,
-        height: initialRect.height,
+        x: initialRect.x,
+        y: initialRect.y,
+        scaleX: initialScale.x,
+        scaleY: initialScale.y,
         borderRadius: 8,
       }}
       animate={{
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
+        x: 0,
+        y: 0,
+        scaleX: 1,
+        scaleY: 1,
         borderRadius: 0,
       }}
       exit={{
-        top: initialRect.y,
-        left: initialRect.x,
-        width: initialRect.width,
-        height: initialRect.height,
+        x: initialRect.x,
+        y: initialRect.y,
+        scaleX: initialScale.x,
+        scaleY: initialScale.y,
         borderRadius: 8,
         opacity: 0,
       }}
-      transition={{ type: "spring", stiffness: 200, damping: 30 }}
-      className={`z-50 bg-gradient-to-b ${bookColors[degree]} overflow-hidden`}
-      style={{ position: "fixed" }}
+      transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+      onAnimationComplete={() => setShowContent(true)}
+      className={`fixed inset-0 z-50 bg-gradient-to-b ${bookColors[degree]} overflow-hidden`}
+      style={{
+        transformOrigin: "0 0",
+        willChange: "transform, border-radius",
+        backfaceVisibility: "hidden",
+      }}
     >
       {/* Inner content - appears after expand */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.4, duration: 0.4 }}
-        className="relative h-full overflow-y-auto"
-      >
-        <MathBackground opacity={0.05} color="hsl(0, 0%, 90%)" />
-        {/* Top bar */}
-        <div className="relative z-10 flex items-center justify-between px-4 py-4 sm:px-6">
-          <button
-            onClick={onBack}
-            className="group flex items-center gap-2 text-sm text-primary-foreground/70 transition-colors hover:text-primary-foreground"
-          >
-            <span className="transition-transform group-hover:-translate-x-1">←</span>
-            Voltar
-          </button>
-          <span className="font-serif text-sm tracking-[0.2em] text-primary-foreground/40 uppercase">
-            Vol. {degree}
-          </span>
-        </div>
+      {showContent && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.24 }}
+          className="relative h-full overflow-y-auto"
+        >
+          <MathBackground opacity={0.05} color="hsl(0, 0%, 90%)" />
+          {/* Top bar */}
+          <div className="relative z-10 flex items-center justify-between px-4 py-4 sm:px-6">
+            <button
+              onClick={onBack}
+              className="group flex items-center gap-2 text-sm text-primary-foreground/70 transition-colors hover:text-primary-foreground"
+            >
+              <span className="transition-transform group-hover:-translate-x-1">←</span>
+              Voltar
+            </button>
+            <span className="font-serif text-sm tracking-[0.2em] text-primary-foreground/40 uppercase">
+              Vol. {degree}
+            </span>
+          </div>
 
-        {/* Content area - whiteboard */}
-        <div className="relative z-10 flex flex-col items-center px-3 pb-10 sm:px-4 sm:pb-12">
-          <motion.h2
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="mb-1 px-2 text-center font-serif text-2xl font-semibold text-primary-foreground sm:text-3xl md:text-4xl"
-          >
-            {info.title}
-          </motion.h2>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6 }}
-            className="w-full max-w-full overflow-x-auto text-center"
-          >
-            <MathDisplay latex={info.equation} className="mb-6 block text-primary-foreground/70 sm:mb-8" />
-          </motion.div>
+          {/* Content area - whiteboard */}
+          <div className="relative z-10 flex flex-col items-center px-3 pb-10 sm:px-4 sm:pb-12">
+            <motion.h2
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.28 }}
+              className="mb-1 px-2 text-center font-serif text-2xl font-semibold text-primary-foreground sm:text-3xl md:text-4xl"
+            >
+              {info.title}
+            </motion.h2>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.28 }}
+              className="w-full max-w-full overflow-x-auto text-center"
+            >
+              <MathDisplay latex={info.equation} className="mb-6 block text-primary-foreground/70 sm:mb-8" />
+            </motion.div>
 
-          {/* Whiteboard card */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.4 }}
-            className="whiteboard w-full max-w-md p-4 sm:p-6 md:p-8"
-          >
-            <p className="mb-5 text-center text-sm text-muted-foreground">
-              Toque no coeficiente e use o teclado da tela ou do PC:
-            </p>
+            {/* Whiteboard card */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.28 }}
+              className="whiteboard w-full max-w-md p-4 sm:p-6 md:p-8"
+            >
+              <p className="mb-5 text-center text-sm text-muted-foreground">
+                Toque no coeficiente e use o teclado da tela ou do PC:
+              </p>
 
-            {/* Coefficient fields */}
-            <div className="mb-6 grid grid-cols-2 justify-items-center gap-x-6 gap-y-4 sm:flex sm:items-center sm:justify-center sm:gap-4 md:gap-6">
-              {labels.map((label, i) => (
-                <div key={label} className="flex flex-col items-center">
-                  <label className="mb-2 font-serif text-sm text-muted-foreground">{label}</label>
-                  <button
-                    onClick={() => setActiveField(i)}
-                    className={`input-notebook w-14 cursor-pointer text-center transition-all duration-200 sm:w-16 md:w-20 ${
-                      activeField === i
-                        ? "border-b-2 border-accent ring-2 ring-accent/20"
-                        : "border-b-2"
-                    }`}
-                    style={{ borderColor: activeField === i ? undefined : "hsl(var(--border))" }}
-                  >
-                    <span className="font-chalk text-2xl text-foreground">
-                      {values[i] || <span className="text-muted-foreground/50">0</span>}
-                    </span>
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            {/* Numeric Keypad */}
-            <NumericKeypad
-              onKey={handleKey}
-              onDelete={handleDelete}
-              onClear={handleClear}
-              onSolve={solve}
-            />
-          </motion.div>
-
-          {/* Solution */}
-          <AnimatePresence>
-            {solution && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.4 }}
-                className="mt-8 w-full max-w-md"
-              >
-                <h3 className="mb-5 font-serif text-xl font-semibold text-primary-foreground md:text-2xl">
-                  Passo a Passo
-                </h3>
-
-                <div className="space-y-3">
-                  {solution.steps.map((step, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.1 }}
-                      className="whiteboard p-5"
+              {/* Coefficient fields */}
+              <div className="mb-6 grid grid-cols-2 justify-items-center gap-x-6 gap-y-4 sm:flex sm:items-center sm:justify-center sm:gap-4 md:gap-6">
+                {labels.map((label, i) => (
+                  <div key={label} className="flex flex-col items-center">
+                    <label className="mb-2 font-serif text-sm text-muted-foreground">{label}</label>
+                    <button
+                      onClick={() => setActiveField(i)}
+                      className={`input-notebook w-14 cursor-pointer text-center transition-all duration-200 sm:w-16 md:w-20 ${
+                        activeField === i
+                          ? "border-b-2 border-accent ring-2 ring-accent/20"
+                          : "border-b-2"
+                      }`}
+                      style={{ borderColor: activeField === i ? undefined : "hsl(var(--border))" }}
                     >
-                      <div className="mb-2 flex items-center gap-3">
-                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent text-xs font-bold text-accent-foreground">
-                          {i + 1}
-                        </span>
-                        <span className="font-serif text-base font-semibold text-primary">
-                          {step.title}
-                        </span>
-                      </div>
-                      <div className="my-2 overflow-x-auto">
-                        <MathDisplay latex={step.latex} />
-                      </div>
-                      <p className="text-sm text-muted-foreground">{step.description}</p>
-                    </motion.div>
-                  ))}
-                </div>
+                      <span className="font-chalk text-2xl text-foreground">
+                        {values[i] || <span className="text-muted-foreground/50">0</span>}
+                      </span>
+                    </button>
+                  </div>
+                ))}
+              </div>
 
+              {/* Numeric Keypad */}
+              <NumericKeypad
+                onKey={handleKey}
+                onDelete={handleDelete}
+                onClear={handleClear}
+                onSolve={solve}
+              />
+            </motion.div>
+
+            {/* Solution */}
+            <AnimatePresence>
+              {solution && (
                 <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: solution.steps.length * 0.1 + 0.2 }}
-                  className="mt-5 rounded-lg border border-accent/30 bg-secondary p-4 sm:p-5"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  transition={{ duration: 0.4 }}
+                  className="mt-8 w-full max-w-md"
                 >
-                  <h4 className="mb-1 font-serif text-base font-semibold text-primary">
-                    Estrutura de Grupo (Galois)
-                  </h4>
-                  <p className="font-chalk text-lg text-foreground">{solution.groupInfo}</p>
+                  <h3 className="mb-5 font-serif text-xl font-semibold text-primary-foreground md:text-2xl">
+                    Passo a Passo
+                  </h3>
+
+                  <div className="space-y-3">
+                    {solution.steps.map((step, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.1 }}
+                        className="whiteboard p-5"
+                      >
+                        <div className="mb-2 flex items-center gap-3">
+                          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent text-xs font-bold text-accent-foreground">
+                            {i + 1}
+                          </span>
+                          <span className="font-serif text-base font-semibold text-primary">
+                            {step.title}
+                          </span>
+                        </div>
+                        <div className="my-2 overflow-x-auto">
+                          <MathDisplay latex={step.latex} />
+                        </div>
+                        <p className="text-sm text-muted-foreground">{step.description}</p>
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: solution.steps.length * 0.1 + 0.2 }}
+                    className="mt-5 rounded-lg border border-accent/30 bg-secondary p-4 sm:p-5"
+                  >
+                    <h4 className="mb-1 font-serif text-base font-semibold text-primary">
+                      Estrutura de Grupo (Galois)
+                    </h4>
+                    <p className="font-chalk text-lg text-foreground">{solution.groupInfo}</p>
+                  </motion.div>
                 </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </motion.div>
+      )}
     </motion.div>
   );
 };
