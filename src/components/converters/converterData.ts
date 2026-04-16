@@ -209,7 +209,9 @@ export const notebooks: NotebookMeta[] = [
   { key: "crypto", title: "Cripto", subtitle: "Ativos digitais", color: "from-[hsl(250,70%,20%)] to-[hsl(250,55%,32%)]", icon: "Bitcoin" },
 ];
 
-export const linearCategories: Record<UnitCategory["key"], UnitCategory> = {
+export type LinearCategoryKey = "length" | "mass" | "energy" | "volume" | "speed";
+
+export const linearCategories: Record<LinearCategoryKey, UnitCategory> = {
   length: lengthCategory,
   mass: massCategory,
   energy: energyCategory,
