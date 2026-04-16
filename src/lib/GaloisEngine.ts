@@ -65,11 +65,15 @@ export function solveLinear(a: number, b: number): Solution {
     };
   }
   const x = -b / a;
+  const equation = formatPolynomial([
+    { coefficient: a, variable: "x" },
+    { coefficient: b, variable: "" },
+  ]);
   return {
     roots: [{ real: x, imag: 0 }],
     steps: [
-      { title: "Equação", latex: `${a}x + ${b} = 0`, description: "Equação linear dada." },
-      { title: "Isolando x", latex: `x = -\\frac{b}{a} = -\\frac{${b}}{${a}}`, description: "Dividimos ambos os lados por a." },
+      { title: "Equação", latex: `${equation} = 0`, description: "Equação linear dada." },
+      { title: "Isolando x", latex: `x = -\\frac{b}{a} = -\\frac{${formatParens(b)}}{${formatParens(a)}}`, description: "Dividimos ambos os lados por a." },
       { title: "Resultado", latex: `x = ${formatNum(x)}`, description: "A raiz da equação." },
     ],
     groupInfo: "Grupo trivial {e} — a equação linear possui simetria trivial sob a teoria de Galois.",
@@ -162,9 +166,20 @@ export function solveCubic(a: number, b: number, c: number, d: number): Solution
   const p = p1 - (p0 * p0) / 3;
   const q = p2 - (p0 * p1) / 3 + (2 * p0 * p0 * p0) / 27;
 
+  const cubicEquation = formatPolynomial([
+    { coefficient: a, variable: "x^3" },
+    { coefficient: b, variable: "x^2" },
+    { coefficient: c, variable: "x" },
+    { coefficient: d, variable: "" },
+  ]);
+  const depressedEquation = formatPolynomial([
+    { coefficient: 1, variable: "t^3" },
+    { coefficient: p, variable: "t" },
+    { coefficient: q, variable: "" },
+  ]);
   const steps: SolutionStep[] = [
-    { title: "Equação", latex: `${a}x^3 + ${b}x^2 + ${c}x + ${d} = 0`, description: "Equação cúbica dada." },
-    { title: "Forma Reduzida (Cardano)", latex: `t^3 + ${formatNum(p)}t + ${formatNum(q)} = 0`, description: `Substituição de Cardano: x = t - \\frac{b}{3a} = t - ${formatNum(p0 / 3)}. Eliminamos o termo quadrático.` },
+    { title: "Equação", latex: `${cubicEquation} = 0`, description: "Equação cúbica dada." },
+    { title: "Forma Reduzida (Cardano)", latex: `${depressedEquation} = 0`, description: `Substituição de Cardano: x = t - \\frac{b}{3a} = t - ${formatNum(p0 / 3)}. Eliminamos o termo quadrático.` },
   ];
 
   const disc = -4 * p * p * p - 27 * q * q;
