@@ -4,6 +4,9 @@ import BookShelf from "@/components/BookShelf";
 import ExpandedBook from "@/components/ExpandedBook";
 import Navigation, { type SectionKey } from "@/components/Navigation";
 import MathBackground from "@/components/MathBackground";
+import ConverterShelf from "@/components/converters/ConverterShelf";
+import ExpandedConverter from "@/components/converters/ExpandedConverter";
+import type { CategoryKey } from "@/components/converters/converterData";
 
 export interface BookRect {
   x: number;
@@ -31,29 +34,44 @@ const ComingSoon = ({ title, description }: { title: string; description: string
 
 const Index = () => {
   const [section, setSection] = useState<SectionKey>("calculators");
+
+  // Calculator (book) state
   const [selectedDegree, setSelectedDegree] = useState<number | null>(null);
   const [bookRect, setBookRect] = useState<BookRect | null>(null);
 
-  const handleSelect = useCallback((degree: number, rect: DOMRect) => {
+  // Converter state
+  const [selectedCategory, setSelectedCategory] = useState<CategoryKey | null>(null);
+  const [converterRect, setConverterRect] = useState<BookRect | null>(null);
+
+  const handleSelectBook = useCallback((degree: number, rect: DOMRect) => {
     setBookRect({ x: rect.x, y: rect.y, width: rect.width, height: rect.height });
-    requestAnimationFrame(() => {
-      setSelectedDegree(degree);
-    });
+    requestAnimationFrame(() => setSelectedDegree(degree));
   }, []);
 
-  const handleBack = useCallback(() => {
+  const handleBackBook = useCallback(() => {
     setSelectedDegree(null);
     setBookRect(null);
+  }, []);
+
+  const handleSelectConverter = useCallback((key: CategoryKey, rect: BookRect) => {
+    setConverterRect(rect);
+    requestAnimationFrame(() => setSelectedCategory(key));
+  }, []);
+
+  const handleBackConverter = useCallback(() => {
+    setSelectedCategory(null);
+    setConverterRect(null);
   }, []);
 
   const handleSectionChange = useCallback((next: SectionKey) => {
     setSelectedDegree(null);
     setBookRect(null);
+    setSelectedCategory(null);
+    setConverterRect(null);
     setSection(next);
   }, []);
 
-  // Hide top nav while a book is fully expanded for an immersive view.
-  const showNavigation = selectedDegree === null;
+  const showNavigation = selectedDegree === null && selectedCategory === null;
 
   return (
     <div className="min-h-screen bg-background overflow-hidden relative">
@@ -70,7 +88,7 @@ const Index = () => {
             transition={{ duration: 0.3, ease: "easeOut" }}
           >
             <AnimatePresence mode="wait">
-              {selectedDegree === null ? <BookShelf key="shelf" onSelect={handleSelect} /> : null}
+              {selectedDegree === null ? <BookShelf key="shelf" onSelect={handleSelectBook} /> : null}
             </AnimatePresence>
           </motion.div>
         )}
@@ -84,10 +102,11 @@ const Index = () => {
             exit="exit"
             transition={{ duration: 0.3, ease: "easeOut" }}
           >
-            <ComingSoon
-              title="Conversores"
-              description="Cadernos de conversão para comprimento, massa, energia, volume, temperatura, velocidade, moedas e cripto — tudo com fórmulas em LaTeX e dados em tempo real."
-            />
+            <AnimatePresence mode="wait">
+              {selectedCategory === null ? (
+                <ConverterShelf key="conv-shelf" onSelect={handleSelectConverter} />
+              ) : null}
+            </AnimatePresence>
           </motion.div>
         )}
 
@@ -111,10 +130,18 @@ const Index = () => {
       <AnimatePresence>
         {selectedDegree !== null && bookRect && (
           <ExpandedBook
-            key={`expanded-${selectedDegree}`}
+            key={`expanded-book-${selectedDegree}`}
             degree={selectedDegree}
             initialRect={bookRect}
-            onBack={handleBack}
+            onBack={handleBackBook}
+          />
+        )}
+        {selectedCategory !== null && converterRect && (
+          <ExpandedConverter
+            key={`expanded-conv-${selectedCategory}`}
+            category={selectedCategory}
+            initialRect={converterRect}
+            onBack={handleBackConverter}
           />
         )}
       </AnimatePresence>
