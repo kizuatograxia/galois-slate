@@ -65,7 +65,7 @@ const BookSpine = ({
     ref={btnRef}
     initial={{ opacity: 0, y: 30 }}
     animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: 0.15 + index * 0.12, duration: 0.5 }}
+    transition={{ delay: 0.05 + index * 0.06, duration: 0.35 }}
     onMouseEnter={onMouseEnter}
     onMouseLeave={onMouseLeave}
     onClick={onClick}
@@ -145,7 +145,7 @@ const BookShelf = ({ onSelect, onSelectCalc }: BookShelfProps) => {
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1, duration: 0.5 }}
+        transition={{ delay: 0.05, duration: 0.3 }}
         className="mb-10 flex flex-col items-center"
       >
         <p className={sectionLabel}>Calculadoras</p>
@@ -174,7 +174,7 @@ const BookShelf = ({ onSelect, onSelectCalc }: BookShelfProps) => {
       <motion.div
         initial={{ opacity: 0, scaleX: 0 }}
         animate={{ opacity: 1, scaleX: 1 }}
-        transition={{ delay: 0.5, duration: 0.5 }}
+        transition={{ delay: 0.25, duration: 0.3 }}
         className="mb-10 h-px w-32 bg-border"
       />
 
@@ -182,7 +182,7 @@ const BookShelf = ({ onSelect, onSelectCalc }: BookShelfProps) => {
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.5 }}
+        transition={{ delay: 0.1, duration: 0.3 }}
         className="flex flex-col items-center"
       >
         <p className={sectionLabel}>Equações</p>

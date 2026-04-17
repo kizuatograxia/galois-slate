@@ -133,7 +133,7 @@ const BriotRuffiniView = ({ degree, coeffs, roots }: Props) => {
                   key={i}
                   initial={{ opacity: 0, y: -4 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.08 }}
+                  transition={{ delay: i * 0.04 }}
                   className={`${colW} text-center text-primary/50 text-xs`}
                 >
                   {v >= 0 ? `+${fmtN(v)}` : fmtN(v)}
@@ -156,7 +156,7 @@ const BriotRuffiniView = ({ degree, coeffs, roots }: Props) => {
                 key={i}
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15 + i * 0.08 }}
+                transition={{ delay: 0.06 + i * 0.04 }}
                 className={`${colW} text-center font-semibold ${
                   i === bot.length - 1
                     ? Math.abs(v) < 1e-8

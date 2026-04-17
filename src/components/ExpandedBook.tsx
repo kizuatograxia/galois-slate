@@ -44,7 +44,6 @@ const ExpandedBook = ({ degree, initialRect, onBack }: ExpandedBookProps) => {
   const [values, setValues] = useState<string[]>(labels.map(() => ""));
   const [activeField, setActiveField] = useState(0);
   const [solution, setSolution] = useState<Solution | null>(null);
-  const [showContent, setShowContent] = useState(false);
   const [activeTab, setActiveTab] = useState<SolutionTab>("steps");
   const [slideDir, setSlideDir] = useState(1);
   const info = degreeLabels[degree];
@@ -169,16 +168,15 @@ const ExpandedBook = ({ degree, initialRect, onBack }: ExpandedBookProps) => {
       animate={{ x: 0, y: 0, scaleX: 1, scaleY: 1, borderRadius: 0 }}
       exit={{   x: initialRect.x, y: initialRect.y, scaleX: initialScale.x, scaleY: initialScale.y, borderRadius: 8, opacity: 0 }}
       transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-      onAnimationComplete={() => setShowContent(true)}
       className={`fixed inset-0 z-50 bg-gradient-to-b ${bookColors[degree]} overflow-hidden`}
       style={{ transformOrigin: "0 0", willChange: "transform, border-radius", backfaceVisibility: "hidden" }}
     >
-      {showContent && (
-        <motion.div
+      {/* Content fades in as the morph animation finishes — no blocking state gate */}
+      <motion.div
           ref={scrollContainerRef}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.24 }}
+          transition={{ delay: 0.28, duration: 0.18 }}
           className="relative h-full overflow-y-auto"
         >
           <MathBackground opacity={0.05} color="hsl(0, 0%, 90%)" />
@@ -258,7 +256,7 @@ const ExpandedBook = ({ degree, initialRect, onBack }: ExpandedBookProps) => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 20 }}
-                  transition={{ duration: 0.4 }}
+                  transition={{ duration: 0.25 }}
                   className="mt-8 w-full max-w-md"
                   style={{ scrollMarginTop: "72px" }}
                 >
@@ -311,7 +309,7 @@ const ExpandedBook = ({ degree, initialRect, onBack }: ExpandedBookProps) => {
                                 key={i}
                                 initial={{ opacity: 0, x: -10 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: i * 0.08 }}
+                                transition={{ delay: i * 0.04 }}
                                 className="whiteboard p-5"
                               >
                                 <div className="mb-2 flex items-center gap-3">
@@ -333,7 +331,7 @@ const ExpandedBook = ({ degree, initialRect, onBack }: ExpandedBookProps) => {
                           <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            transition={{ delay: solution.steps.length * 0.08 + 0.2 }}
+                            transition={{ delay: solution.steps.length * 0.04 + 0.1 }}
                             className="mt-5 rounded-lg border border-accent/30 bg-secondary p-4 sm:p-5"
                           >
                             <h4 className="mb-1 font-serif text-base font-semibold text-primary">
@@ -366,7 +364,6 @@ const ExpandedBook = ({ degree, initialRect, onBack }: ExpandedBookProps) => {
             </AnimatePresence>
           </div>
         </motion.div>
-      )}
     </motion.div>
   );
 };

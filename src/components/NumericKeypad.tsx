@@ -1,5 +1,3 @@
-import { motion } from "framer-motion";
-
 interface NumericKeypadProps {
   onKey: (key: string) => void;
   onDelete: () => void;
@@ -14,58 +12,46 @@ const keys = [
   ["±", "0", "."],
 ];
 
+// Plain buttons — hover/active handled by CSS classes (GPU-composited)
+// Removing motion.button eliminates 12 Framer Motion animation targets
 const NumericKeypad = ({ onKey, onDelete, onClear, onSolve }: NumericKeypadProps) => {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.3, duration: 0.4 }}
-      className="w-full max-w-xs mx-auto"
-    >
+    <div className="w-full max-w-xs mx-auto">
       <div className="grid grid-cols-3 gap-2">
         {keys.map((row) =>
           row.map((key) => (
-            <motion.button
+            <button
               key={key}
-              whileTap={{ scale: 0.92 }}
-              whileHover={{ scale: 1.05 }}
               onClick={() => onKey(key)}
               className="keypad-btn font-chalk text-2xl"
             >
               {key}
-            </motion.button>
+            </button>
           ))
         )}
       </div>
 
-      {/* Action row */}
       <div className="mt-2 grid grid-cols-3 gap-2">
-        <motion.button
-          whileTap={{ scale: 0.92 }}
-          whileHover={{ scale: 1.05 }}
+        <button
           onClick={onDelete}
           className="keypad-btn-action font-sans text-sm font-medium"
         >
           ⌫
-        </motion.button>
-        <motion.button
-          whileTap={{ scale: 0.92 }}
-          whileHover={{ scale: 1.05 }}
+        </button>
+        <button
           onClick={onClear}
           className="keypad-btn-action font-sans text-sm font-medium"
         >
           C
-        </motion.button>
-        <motion.button
-          whileTap={{ scale: 0.92 }}
-          whileHover={{ scale: 1.05 }}
+        </button>
+        <button
           onClick={onSolve}
           className="keypad-btn-solve font-serif text-lg font-semibold"
         >
           Resolver
-        </motion.button>
+        </button>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
