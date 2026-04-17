@@ -1,0 +1,60 @@
+schema: "paperclip/v1"
+sidebar:
+  agents:
+    - "product-lead"
+    - "calculator-engineer"
+    - "qa-analyst"
+  projects:
+    - "galois-canvas"
+agents:
+  product-lead:
+    role: "pm"
+    icon: "target"
+    adapter:
+      type: "codex_local"
+      config: {}
+  calculator-engineer:
+    role: "engineer"
+    icon: "code"
+    adapter:
+      type: "codex_local"
+      config: {}
+  qa-analyst:
+    role: "qa"
+    icon: "shield"
+    adapter:
+      type: "codex_local"
+      config: {}
+projects:
+  galois-canvas:
+    status: "in_progress"
+    color: "#14b8a6"
+    executionWorkspacePolicy:
+      enabled: true
+      defaultMode: "isolated_workspace"
+      allowIssueOverride: true
+      defaultProjectWorkspaceKey: "main-repo"
+      workspaceStrategy:
+        type: "project_primary"
+    workspaces:
+      main-repo:
+        name: "Galois Slate"
+        sourceType: "git"
+        repoUrl: "https://github.com/kizuatograxia/galois-slate.git"
+        repoRef: "main"
+        defaultRef: "main"
+        setupCommand: "npm install"
+        isPrimary: true
+tasks:
+  stabilize-equation-engine:
+    status: "todo"
+    priority: "high"
+    projectWorkspaceKey: "main-repo"
+  improve-calculator-ux:
+    status: "todo"
+    priority: "medium"
+    projectWorkspaceKey: "main-repo"
+  browser-smoke-test:
+    status: "todo"
+    priority: "medium"
+    projectWorkspaceKey: "main-repo"

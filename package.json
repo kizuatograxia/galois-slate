@@ -9,6 +9,10 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
+    "paperclip:onboard": "npx --yes paperclipai onboard --yes",
+    "paperclip:run": "npx --yes paperclipai run",
+    "paperclip:preview": "npx --yes paperclipai company import . --target new --include company,agents,projects,issues,tasks,skills --dry-run",
+    "paperclip:import": "npx --yes paperclipai company import . --target new --new-company-name \"Galois Canvas\" --include company,agents,projects,issues,tasks,skills --yes",
     "test": "vitest run",
     "test:watch": "vitest"
   },
