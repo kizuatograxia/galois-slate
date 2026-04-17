@@ -2,12 +2,14 @@ import { useState, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import BookShelf from "@/components/BookShelf";
 import ExpandedBook from "@/components/ExpandedBook";
+import ExpandedCalculator from "@/components/ExpandedCalculator";
 import Navigation, { type SectionKey } from "@/components/Navigation";
 import MathBackground from "@/components/MathBackground";
 import ConverterShelf from "@/components/converters/ConverterShelf";
 import ExpandedConverter from "@/components/converters/ExpandedConverter";
 import type { CategoryKey } from "@/components/converters/converterData";
 import AcademiaSection from "@/components/academia/AcademiaSection";
+import type { CalculatorType } from "@/lib/calcTypes";
 
 export interface BookRect {
   x: number;
@@ -19,7 +21,7 @@ export interface BookRect {
 const sectionVariants = {
   initial: { opacity: 0, y: 8 },
   animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -8 },
+  exit:    { opacity: 0, y: -8 },
 };
 
 const ComingSoon = ({ title, description }: { title: string; description: string }) => (
@@ -36,13 +38,17 @@ const ComingSoon = ({ title, description }: { title: string; description: string
 const Index = () => {
   const [section, setSection] = useState<SectionKey>("calculators");
 
-  // Calculator (book) state
+  // Equation book state
   const [selectedDegree, setSelectedDegree] = useState<number | null>(null);
   const [bookRect, setBookRect] = useState<BookRect | null>(null);
 
   // Converter state
   const [selectedCategory, setSelectedCategory] = useState<CategoryKey | null>(null);
   const [converterRect, setConverterRect] = useState<BookRect | null>(null);
+
+  // Calculator state
+  const [selectedCalcType, setSelectedCalcType] = useState<CalculatorType | null>(null);
+  const [calcRect, setCalcRect] = useState<BookRect | null>(null);
 
   const handleSelectBook = useCallback((degree: number, rect: DOMRect) => {
     setBookRect({ x: rect.x, y: rect.y, width: rect.width, height: rect.height });
@@ -64,15 +70,28 @@ const Index = () => {
     setConverterRect(null);
   }, []);
 
+  const handleSelectCalc = useCallback((type: CalculatorType, rect: DOMRect) => {
+    setCalcRect({ x: rect.x, y: rect.y, width: rect.width, height: rect.height });
+    requestAnimationFrame(() => setSelectedCalcType(type));
+  }, []);
+
+  const handleBackCalc = useCallback(() => {
+    setSelectedCalcType(null);
+    setCalcRect(null);
+  }, []);
+
   const handleSectionChange = useCallback((next: SectionKey) => {
     setSelectedDegree(null);
     setBookRect(null);
     setSelectedCategory(null);
     setConverterRect(null);
+    setSelectedCalcType(null);
+    setCalcRect(null);
     setSection(next);
   }, []);
 
-  const showNavigation = selectedDegree === null && selectedCategory === null;
+  const showNavigation =
+    selectedDegree === null && selectedCategory === null && selectedCalcType === null;
 
   return (
     <div className="min-h-screen bg-background overflow-hidden relative">
@@ -89,7 +108,13 @@ const Index = () => {
             transition={{ duration: 0.3, ease: "easeOut" }}
           >
             <AnimatePresence mode="wait">
-              {selectedDegree === null ? <BookShelf key="shelf" onSelect={handleSelectBook} /> : null}
+              {selectedDegree === null && selectedCalcType === null ? (
+                <BookShelf
+                  key="shelf"
+                  onSelect={handleSelectBook}
+                  onSelectCalc={handleSelectCalc}
+                />
+              ) : null}
             </AnimatePresence>
           </motion.div>
         )}
@@ -125,6 +150,7 @@ const Index = () => {
         )}
       </AnimatePresence>
 
+      {/* Fullscreen overlays — rendered above everything */}
       <AnimatePresence>
         {selectedDegree !== null && bookRect && (
           <ExpandedBook
@@ -140,6 +166,14 @@ const Index = () => {
             category={selectedCategory}
             initialRect={converterRect}
             onBack={handleBackConverter}
+          />
+        )}
+        {selectedCalcType !== null && calcRect && (
+          <ExpandedCalculator
+            key={`expanded-calc-${selectedCalcType}`}
+            calcType={selectedCalcType}
+            initialRect={calcRect}
+            onBack={handleBackCalc}
           />
         )}
       </AnimatePresence>

@@ -76,7 +76,8 @@ const AcademiaSection = memo(() => {
   };
 
   return (
-    <div className="relative min-h-screen bg-background">
+    // pt-[60px] pushes content below the absolute Navigation bar (≈60px tall)
+    <div className="relative min-h-screen bg-background pt-[60px]">
       <MathBackground theme="light" opacity={0.04} />
       <AcademiaHeader progress={progress} />
 
