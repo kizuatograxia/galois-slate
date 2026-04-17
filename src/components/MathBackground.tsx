@@ -222,9 +222,11 @@ interface MathBackgroundProps {
   className?: string;
 }
 
-const ROW_COUNT = 46;
-const TERMS_PER_ROW = 26;
-const ANIMATE_EVERY = 11;
+// Reduced from 46→20 rows and 26→14 terms/row.
+// 46×26 = 1196 text-node operations per mount → 20×14 = 280. 4× less DOM work.
+const ROW_COUNT = 20;
+const TERMS_PER_ROW = 14;
+const ANIMATE_EVERY = 20; // 1 animated row out of 20 instead of 4 out of 46
 
 const makeLine = (seed: number, terms: number) =>
   Array.from({ length: terms }, (_, i) => mathLines[(seed * 7 + i * 11) % mathLines.length]).join("   ");

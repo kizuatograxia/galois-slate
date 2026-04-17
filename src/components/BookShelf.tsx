@@ -77,7 +77,7 @@ const BookSpine = ({
         opacity: isOther ? 0.6 : 1,
         scale: isHovered ? 1.04 : isOther ? 0.98 : 1,
       }}
-      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      transition={{ duration: 0.18, ease: "easeOut" }}
       className={`relative flex h-[min(44vh,300px)] w-[clamp(4.5rem,22vw,7.5rem)] flex-col items-center justify-between overflow-hidden rounded-lg bg-gradient-to-b ${color} p-3 sm:p-4 md:h-[340px] md:p-5`}
       style={{
         boxShadow: isHovered

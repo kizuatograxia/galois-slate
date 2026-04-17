@@ -31,9 +31,9 @@ const ConverterShelf = ({ onSelect }: ConverterShelfProps) => {
       <MathBackground theme="light" />
 
       <motion.h1
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
+        transition={{ duration: 0.25 }}
         className="mb-2 px-4 text-center font-serif-display text-4xl font-semibold tracking-tight text-primary sm:text-5xl md:text-6xl"
       >
         Conversores
@@ -41,7 +41,7 @@ const ConverterShelf = ({ onSelect }: ConverterShelfProps) => {
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.3, duration: 0.5 }}
+        transition={{ delay: 0.1, duration: 0.2 }}
         className="mb-10 px-4 text-center text-base text-muted-foreground sm:text-lg"
       >
         Escolha um caderno para começar
@@ -59,7 +59,7 @@ const ConverterShelf = ({ onSelect }: ConverterShelfProps) => {
               ref={(el) => { refs.current[i] = el; }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 + i * 0.06, duration: 0.45 }}
+              transition={{ delay: 0.05 + i * 0.03, duration: 0.25 }}
               onMouseEnter={() => setHovered(i)}
               onMouseLeave={() => setHovered(null)}
               onClick={() => handleClick(nb, i)}
@@ -70,7 +70,7 @@ const ConverterShelf = ({ onSelect }: ConverterShelfProps) => {
                   opacity: isOther ? 0.65 : 1,
                   scale: isHovered ? 1.04 : isOther ? 0.98 : 1,
                 }}
-                transition={{ type: "spring", stiffness: 260, damping: 26 }}
+                transition={{ duration: 0.18, ease: "easeOut" }}
                 className={`relative flex h-44 flex-col items-start justify-between overflow-hidden rounded-lg bg-gradient-to-b ${nb.color} p-4 sm:h-48 sm:p-5`}
                 style={{
                   boxShadow: isHovered

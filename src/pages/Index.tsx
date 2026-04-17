@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, startTransition } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import BookShelf from "@/components/BookShelf";
 import ExpandedBook from "@/components/ExpandedBook";
@@ -18,10 +18,12 @@ export interface BookRect {
   height: number;
 }
 
+// Opacity-only — y movement is unnecessary and adds layout work.
+// Short duration keeps section switches feeling snappy.
 const sectionVariants = {
-  initial: { opacity: 0, y: 8 },
-  animate: { opacity: 1, y: 0 },
-  exit:    { opacity: 0, y: -8 },
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  exit:    { opacity: 0 },
 };
 
 const ComingSoon = ({ title, description }: { title: string; description: string }) => (
@@ -81,13 +83,17 @@ const Index = () => {
   }, []);
 
   const handleSectionChange = useCallback((next: SectionKey) => {
-    setSelectedDegree(null);
-    setBookRect(null);
-    setSelectedCategory(null);
-    setConverterRect(null);
-    setSelectedCalcType(null);
-    setCalcRect(null);
-    setSection(next);
+    // startTransition marks this as a low-priority update so React yields to
+    // any in-flight animations before committing the heavy new-section render.
+    startTransition(() => {
+      setSelectedDegree(null);
+      setBookRect(null);
+      setSelectedCategory(null);
+      setConverterRect(null);
+      setSelectedCalcType(null);
+      setCalcRect(null);
+      setSection(next);
+    });
   }, []);
 
   const showNavigation =
@@ -105,7 +111,7 @@ const Index = () => {
             initial="initial"
             animate="animate"
             exit="exit"
-            transition={{ duration: 0.3, ease: "easeOut" }}
+            transition={{ duration: 0.15 }}
           >
             <AnimatePresence mode="wait">
               {selectedDegree === null && selectedCalcType === null ? (
@@ -126,7 +132,7 @@ const Index = () => {
             initial="initial"
             animate="animate"
             exit="exit"
-            transition={{ duration: 0.3, ease: "easeOut" }}
+            transition={{ duration: 0.15 }}
           >
             <AnimatePresence mode="wait">
               {selectedCategory === null ? (
@@ -143,7 +149,7 @@ const Index = () => {
             initial="initial"
             animate="animate"
             exit="exit"
-            transition={{ duration: 0.3, ease: "easeOut" }}
+            transition={{ duration: 0.15 }}
           >
             <AcademiaSection />
           </motion.div>
