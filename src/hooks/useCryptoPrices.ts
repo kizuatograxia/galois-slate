@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 
 export interface CryptoMeta {
-  id: string;       // CoinGecko id
-  symbol: string;   // BTC, ETH...
+  id: string;
+  symbol: string;
   name: string;
   emoji: string;
 }
@@ -21,27 +21,34 @@ export const CRYPTO_LIST: CryptoMeta[] = [
   { id: "the-open-network", symbol: "TON", name: "Toncoin", emoji: "💎" },
 ];
 
-export interface CryptoPrice {
-  usd: number;
-  brl: number;
-  eur: number;
-  usd_24h_change?: number;
+export interface CryptoPriceEntry {
+  price: number;
+  change24h?: number;
 }
 
-export type CryptoPricesMap = Record<string, CryptoPrice>;
+export type CryptoPricesMap = Record<string, CryptoPriceEntry>;
 
-const fetchCryptoPrices = async (): Promise<CryptoPricesMap> => {
+const fetchCryptoPrices = async (currency: string): Promise<CryptoPricesMap> => {
   const ids = CRYPTO_LIST.map((c) => c.id).join(",");
-  const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd,brl,eur&include_24hr_change=true`;
+  const cur = currency.toLowerCase();
+  const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=${cur}&include_24hr_change=true`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Falha ao buscar cripto (${res.status})`);
-  return res.json();
+  const json: Record<string, Record<string, number>> = await res.json();
+  const out: CryptoPricesMap = {};
+  for (const [id, entry] of Object.entries(json)) {
+    out[id] = {
+      price: entry[cur],
+      change24h: entry[`${cur}_24h_change`],
+    };
+  }
+  return out;
 };
 
-export const useCryptoPrices = () => {
+export const useCryptoPrices = (currency: string = "usd") => {
   return useQuery({
-    queryKey: ["crypto-prices"],
-    queryFn: fetchCryptoPrices,
+    queryKey: ["crypto-prices", currency.toLowerCase()],
+    queryFn: () => fetchCryptoPrices(currency),
     staleTime: 25 * 1000,
     refetchInterval: 30 * 1000,
     retry: 2,
