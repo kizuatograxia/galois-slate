@@ -37,3 +37,23 @@ export interface SessionResult {
   topic: TopicKey;
   difficulty: Difficulty;
 }
+
+export const XP_BY_DIFFICULTY: Record<Difficulty, number> = {
+  iniciante: 10,
+  intermediario: 20,
+  avancado: 35,
+};
+
+export const TOPIC_LABELS: Record<TopicKey, string> = {
+  aritmetica: "Aritmética",
+  algebra: "Álgebra",
+  geometria: "Geometria",
+  trigonometria: "Trigonometria",
+  probabilidade: "Probabilidade",
+};
+
+export const DIFFICULTY_LABELS: Record<Difficulty, string> = {
+  iniciante: "Iniciante",
+  intermediario: "Intermediário",
+  avancado: "Avançado",
+};

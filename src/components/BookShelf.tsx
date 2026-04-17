@@ -74,7 +74,7 @@ const BookShelf = ({ onSelect }: BookShelfProps) => {
         Selecione o grau da equação
       </motion.p>
 
-      <div className="flex w-full max-w-[24rem] items-end justify-center gap-2 sm:max-w-[30rem] sm:gap-3 md:max-w-none md:gap-6">
+      <div className="flex w-full items-end justify-center gap-[clamp(0.5rem,2.5vw,1.5rem)] px-[clamp(1rem,4vw,3rem)]">
         {books.map((book, i) => {
           const isHovered = hovered === i;
           const isOther = hovered !== null && hovered !== i;
@@ -98,7 +98,7 @@ const BookShelf = ({ onSelect }: BookShelfProps) => {
                   scale: isHovered ? 1.04 : isOther ? 0.98 : 1,
                 }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                className={`relative flex h-[min(48vh,320px)] w-[clamp(5.75rem,27vw,8.5rem)] flex-col items-center justify-between overflow-hidden rounded-lg bg-gradient-to-b ${book.color} p-3 sm:h-[320px] sm:w-32 sm:p-4 md:h-[380px] md:w-[150px] md:p-6`}
+                className={`relative flex h-[min(48vh,320px)] w-[clamp(5rem,24vw,8.5rem)] flex-col items-center justify-between overflow-hidden rounded-lg bg-gradient-to-b ${book.color} p-3 sm:p-4 md:h-[380px] md:p-6`}
                 style={{
                   boxShadow: isHovered
                     ? "0 12px 50px -10px hsla(213, 70%, 30%, 0.35), 4px 0 15px -5px hsla(213, 70%, 30%, 0.1)"

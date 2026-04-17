@@ -1,14 +1,7 @@
 import { useState, useCallback, useMemo, useEffect, memo } from "react";
 import { ArrowLeftRight, Copy, Check, ArrowUp, ArrowDown } from "lucide-react";
 import { useCryptoPrices, useCryptoSparkline, CRYPTO_LIST } from "@/hooks/useCryptoPrices";
-
-type FiatChoice = "usd" | "brl" | "eur";
-
-const FIAT_CHOICES: { id: FiatChoice; label: string; flag: string }[] = [
-  { id: "usd", label: "USD", flag: "🇺🇸" },
-  { id: "brl", label: "BRL", flag: "🇧🇷" },
-  { id: "eur", label: "EUR", flag: "🇪🇺" },
-];
+import { FIAT_CURRENCIES } from "@/hooks/useCurrencyRates";
 
 const formatPlain = (n: number, digits = 8): string => {
   if (!Number.isFinite(n)) return "—";
@@ -46,15 +39,14 @@ Sparkline.displayName = "Sparkline";
 
 const CryptoConverter = memo(() => {
   const [cryptoId, setCryptoId] = useState("bitcoin");
-  const [fiat, setFiat] = useState<FiatChoice>("usd");
+  const [fiat, setFiat] = useState<string>("USD");
   const [direction, setDirection] = useState<"crypto-to-fiat" | "fiat-to-crypto">("crypto-to-fiat");
   const [value, setValue] = useState("1");
   const [copied, setCopied] = useState(false);
   const [countdown, setCountdown] = useState(30);
 
-  const { data, isLoading, isError, dataUpdatedAt } = useCryptoPrices();
+  const { data, isLoading, isError, dataUpdatedAt } = useCryptoPrices(fiat);
 
-  // Countdown until next refetch (refetchInterval is 30s).
   useEffect(() => {
     setCountdown(30);
     const tick = setInterval(() => {
@@ -64,9 +56,10 @@ const CryptoConverter = memo(() => {
   }, [dataUpdatedAt]);
 
   const meta = CRYPTO_LIST.find((c) => c.id === cryptoId)!;
+  const fiatMeta = FIAT_CURRENCIES.find((f) => f.code === fiat);
   const price = data?.[cryptoId];
-  const rate = price?.[fiat] ?? NaN;
-  const change = price?.usd_24h_change ?? 0;
+  const rate = price?.price ?? NaN;
+  const change = price?.change24h ?? 0;
 
   const result = useMemo(() => {
     const v = parseFloat(value);
@@ -86,8 +79,34 @@ const CryptoConverter = memo(() => {
   }, [result]);
 
   const cryptoToFiat = direction === "crypto-to-fiat";
-  const fromLabel = cryptoToFiat ? `${meta.symbol}` : fiat.toUpperCase();
-  const toLabel = cryptoToFiat ? fiat.toUpperCase() : meta.symbol;
+  const fromLabel = cryptoToFiat ? `${meta.symbol}` : fiat;
+  const toLabel = cryptoToFiat ? fiat : meta.symbol;
+
+  const FiatSelect = ({ ariaLabel, className }: { ariaLabel: string; className?: string }) => (
+    <select
+      value={fiat}
+      onChange={(e) => setFiat(e.target.value)}
+      className={`rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/40 ${className ?? ""}`}
+      aria-label={ariaLabel}
+    >
+      {FIAT_CURRENCIES.map((f) => (
+        <option key={f.code} value={f.code}>{f.flag} {f.code} — {f.name}</option>
+      ))}
+    </select>
+  );
+
+  const CryptoSelect = ({ ariaLabel, className }: { ariaLabel: string; className?: string }) => (
+    <select
+      value={cryptoId}
+      onChange={(e) => setCryptoId(e.target.value)}
+      className={`rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/40 ${className ?? ""}`}
+      aria-label={ariaLabel}
+    >
+      {CRYPTO_LIST.map((c) => (
+        <option key={c.id} value={c.id}>{c.emoji} {c.symbol} — {c.name}</option>
+      ))}
+    </select>
+  );
 
   return (
     <div className="w-full max-w-2xl">
@@ -117,27 +136,9 @@ const CryptoConverter = memo(() => {
               aria-label="Valor de entrada"
             />
             {cryptoToFiat ? (
-              <select
-                value={cryptoId}
-                onChange={(e) => setCryptoId(e.target.value)}
-                className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/40"
-                aria-label="Criptomoeda"
-              >
-                {CRYPTO_LIST.map((c) => (
-                  <option key={c.id} value={c.id}>{c.emoji} {c.symbol} — {c.name}</option>
-                ))}
-              </select>
+              <CryptoSelect ariaLabel="Criptomoeda" />
             ) : (
-              <select
-                value={fiat}
-                onChange={(e) => setFiat(e.target.value as FiatChoice)}
-                className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/40"
-                aria-label="Moeda fiat"
-              >
-                {FIAT_CHOICES.map((f) => (
-                  <option key={f.id} value={f.id}>{f.flag} {f.label}</option>
-                ))}
-              </select>
+              <FiatSelect ariaLabel="Moeda fiat" />
             )}
           </div>
 
@@ -159,27 +160,9 @@ const CryptoConverter = memo(() => {
             </div>
             <div className="flex items-center gap-2">
               {cryptoToFiat ? (
-                <select
-                  value={fiat}
-                  onChange={(e) => setFiat(e.target.value as FiatChoice)}
-                  className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/40"
-                  aria-label="Moeda fiat de destino"
-                >
-                  {FIAT_CHOICES.map((f) => (
-                    <option key={f.id} value={f.id}>{f.flag} {f.label}</option>
-                  ))}
-                </select>
+                <FiatSelect ariaLabel="Moeda fiat de destino" className="flex-1" />
               ) : (
-                <select
-                  value={cryptoId}
-                  onChange={(e) => setCryptoId(e.target.value)}
-                  className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/40"
-                  aria-label="Criptomoeda de destino"
-                >
-                  {CRYPTO_LIST.map((c) => (
-                    <option key={c.id} value={c.id}>{c.emoji} {c.symbol} — {c.name}</option>
-                  ))}
-                </select>
+                <CryptoSelect ariaLabel="Criptomoeda de destino" className="flex-1" />
               )}
               <button
                 type="button"
@@ -197,7 +180,7 @@ const CryptoConverter = memo(() => {
           <div className="flex items-center gap-2 text-sm">
             <span className="font-chalk text-xl text-foreground">{meta.emoji} {meta.symbol}</span>
             <span className="text-muted-foreground">
-              1 {meta.symbol} = {formatPlain(rate, 6)} {fiat.toUpperCase()}
+              1 {meta.symbol} = {formatPlain(rate, 6)} {fiatMeta?.flag ?? ""} {fiat}
             </span>
             {Number.isFinite(change) && (
               <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${change >= 0 ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400" : "bg-destructive/15 text-destructive"}`}>
@@ -208,7 +191,7 @@ const CryptoConverter = memo(() => {
           </div>
           <div className="w-full sm:w-60">
             <Sparkline id={cryptoId} />
-            <div className="mt-1 text-right text-[10px] uppercase tracking-widest text-muted-foreground">7 dias</div>
+            <div className="mt-1 text-right text-[10px] uppercase tracking-widest text-muted-foreground">7 dias · USD</div>
           </div>
         </div>
       </div>

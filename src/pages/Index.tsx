@@ -7,6 +7,7 @@ import MathBackground from "@/components/MathBackground";
 import ConverterShelf from "@/components/converters/ConverterShelf";
 import ExpandedConverter from "@/components/converters/ExpandedConverter";
 import type { CategoryKey } from "@/components/converters/converterData";
+import AcademiaSection from "@/components/academia/AcademiaSection";
 
 export interface BookRect {
   x: number;
@@ -119,10 +120,7 @@ const Index = () => {
             exit="exit"
             transition={{ duration: 0.3, ease: "easeOut" }}
           >
-            <ComingSoon
-              title="Academia"
-              description="Pratique matemática como no Duolingo: streaks, XP, níveis e questões geradas proceduralmente, com notas históricas sobre cada conceito."
-            />
+            <AcademiaSection />
           </motion.div>
         )}
       </AnimatePresence>
