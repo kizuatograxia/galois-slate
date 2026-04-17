@@ -9,7 +9,7 @@ interface Props {
   onHome: () => void;
 }
 
-const performance = (correct: number, total: number) => {
+const getPerformance = (correct: number, total: number) => {
   const pct = correct / total;
   if (pct >= 1) return { Icon: Trophy, color: "text-[hsl(45,80%,45%)]", message: "Perfeito! Galois ficaria orgulhoso." };
   if (pct >= 0.8) return { Icon: Star, color: "text-accent", message: "Excelente! Você está dominando o assunto." };
@@ -18,21 +18,21 @@ const performance = (correct: number, total: number) => {
 };
 
 const SessionResult = memo(({ result, onRestart, onHome }: Props) => {
-  const { Icon, color, message } = performance(result.correct, result.total);
+  const { Icon, color, message } = getPerformance(result.correct, result.total);
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    const start = performance.length; // unused trick
-    void start;
     const duration = 1200;
     const t0 = Date.now();
+    let raf = 0;
     const tick = () => {
       const elapsed = Date.now() - t0;
       const p = Math.min(1, elapsed / duration);
       setCount(Math.round(p * result.xpEarned));
-      if (p < 1) requestAnimationFrame(tick);
+      if (p < 1) raf = requestAnimationFrame(tick);
     };
-    requestAnimationFrame(tick);
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
   }, [result.xpEarned]);
 
   return (
