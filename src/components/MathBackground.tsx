@@ -191,20 +191,22 @@ const rng = (seed: number): number => {
   return x - Math.floor(x);
 };
 
+// Uses only opacity + transform — both compositor-threaded (no paint on main thread).
+// clip-path was replaced because `clip-path: inset()` cannot be GPU-composited and
+// caused full repaint every frame, creating main-thread contention with other animations.
 const CHALK_KEYFRAMES = `
   @keyframes chalkLine {
-    0%   { clip-path: inset(0 100% 0 0); opacity: 0; }
-    5%   { opacity: .75; }
-    26%  { clip-path: inset(0 0% 0 0); opacity: .75; }
-    86%  { clip-path: inset(0 0% 0 0); opacity: .75; }
-    96%  { clip-path: inset(0 0% 0 0); opacity: 0; }
-    100% { clip-path: inset(0 100% 0 0); opacity: 0; }
+    0%   { opacity: 0;    transform: translateX(6%); }
+    8%   { opacity: .72; }
+    24%  { transform: translateX(0%); }
+    84%  { opacity: .72;  transform: translateX(0%); }
+    96%  { opacity: 0;    transform: translateX(-4%); }
+    100% { opacity: 0; }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .chalk-row--animated {
       animation: none !important;
-      clip-path: none !important;
       opacity: .65 !important;
     }
   }
@@ -279,7 +281,7 @@ const MathBackground = memo(({ opacity, color, theme = "light", className = "" }
                 transform: `translateX(${row.shift}%) rotate(${row.rotate}deg)`,
                 transformOrigin: "left center",
                 animation: row.animation,
-                willChange: row.animation ? "clip-path" : undefined,
+                willChange: row.animation ? "opacity, transform" : undefined,
                 textShadow: "0 0 1px currentColor",
               }}
             >

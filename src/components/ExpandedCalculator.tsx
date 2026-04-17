@@ -14,6 +14,7 @@ interface ExpandedCalculatorProps {
 }
 
 const ExpandedCalculator = ({ calcType, initialRect, onBack }: ExpandedCalculatorProps) => {
+  const [showContent, setShowContent] = useState(false);
   const book = CALC_BOOKS.find(b => b.type === calcType)!;
 
   const viewport = useMemo(() => ({
@@ -51,13 +52,15 @@ const ExpandedCalculator = ({ calcType, initialRect, onBack }: ExpandedCalculato
         opacity: 0,
       }}
       transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+      onAnimationComplete={() => setShowContent(true)}
       className={`fixed inset-0 z-50 bg-gradient-to-b ${book.expandedColor} overflow-hidden`}
       style={{ transformOrigin: "0 0", willChange: "transform, border-radius", backfaceVisibility: "hidden" }}
     >
-      <motion.div
+      {showContent && (
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.28, duration: 0.18 }}
+          transition={{ duration: 0.2 }}
           className="relative h-full overflow-y-auto"
         >
           <MathBackground opacity={0.04} color="hsl(0, 0%, 90%)" />
@@ -97,6 +100,7 @@ const ExpandedCalculator = ({ calcType, initialRect, onBack }: ExpandedCalculato
             </motion.div>
           </div>
         </motion.div>
+      )}
     </motion.div>
   );
 };
