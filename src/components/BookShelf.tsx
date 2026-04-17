@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import MathBackground from "./MathBackground";
+import GaloisLogo from "./GaloisLogo";
 
 interface Book {
   degree: number;
@@ -61,9 +62,9 @@ const BookShelf = ({ onSelect }: BookShelfProps) => {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="mb-2 px-4 text-center font-serif text-4xl font-semibold tracking-tight text-primary sm:text-5xl md:text-6xl"
+        className="mb-2 flex justify-center px-4"
       >
-        Galois Canvas
+        <GaloisLogo variant="full" className="h-[52px] w-auto sm:h-[64px]" />
       </motion.h1>
       <motion.p
         initial={{ opacity: 0 }}

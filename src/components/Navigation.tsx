@@ -1,4 +1,5 @@
 import { memo } from "react";
+import GaloisLogo from "@/components/GaloisLogo";
 
 export type SectionKey = "calculators" | "converters" | "academia";
 
@@ -16,10 +17,14 @@ const TABS: { key: SectionKey; label: string }[] = [
 const Navigation = memo(({ active, onChange }: NavigationProps) => {
   return (
     <nav
-      className="absolute top-0 left-0 right-0 z-30 flex justify-center pt-6 pb-4"
+      className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-5 sm:px-8 pt-5 pb-3"
       aria-label="Seções principais"
     >
-      <ul className="flex items-center gap-8 sm:gap-12 font-serif-display text-sm tracking-widest uppercase">
+      {/* Logo mark — left */}
+      <GaloisLogo variant="compact" className="h-[28px] w-auto shrink-0" />
+
+      {/* Tabs — center */}
+      <ul className="flex items-center gap-6 sm:gap-10 font-serif-display text-sm tracking-widest uppercase">
         {TABS.map((tab) => {
           const isActive = tab.key === active;
           return (
@@ -45,6 +50,9 @@ const Navigation = memo(({ active, onChange }: NavigationProps) => {
           );
         })}
       </ul>
+
+      {/* Spacer — right (mirrors logo width for visual balance) */}
+      <div className="w-[90px] shrink-0 hidden sm:block" aria-hidden="true" />
     </nav>
   );
 });
