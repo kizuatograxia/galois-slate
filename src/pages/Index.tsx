@@ -10,6 +10,7 @@ import ExpandedConverter from "@/components/converters/ExpandedConverter";
 import type { CategoryKey } from "@/components/converters/converterData";
 import AcademiaSection from "@/components/academia/AcademiaSection";
 import type { CalculatorType } from "@/lib/calcTypes";
+import Exatas from "./Exatas";
 
 export interface BookRect {
   x: number;
@@ -152,6 +153,19 @@ const Index = () => {
             transition={{ duration: 0.15 }}
           >
             <AcademiaSection />
+          </motion.div>
+        )}
+
+        {section === "exatas" && (
+          <motion.div
+            key="section-exatas"
+            variants={sectionVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={{ duration: 0.15 }}
+          >
+            <Exatas />
           </motion.div>
         )}
       </AnimatePresence>
